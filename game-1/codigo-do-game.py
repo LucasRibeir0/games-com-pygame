@@ -291,7 +291,7 @@ while janela_aberta:
         if recorde>= musica_na_tela and recorde < 200 and musica == True:
             iteracao = 2
             janela.blit(texto_nome,(280,220))
-            janela.blit(textogeral,(280,250))
+            janela.blit(texto_pedido,(280,250))
 
     for coracaozinho in lista_coracao:
         MoverCoracao(coracaozinho)
