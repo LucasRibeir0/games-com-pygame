@@ -1,3 +1,5 @@
+import time
+
 import pygame,random
 #Mensagem para exibir informações sobre o desenvolvedor do jogo no terminal
 desenvolvedor = {'Desenvolvedor: ':'Lucas Ribeiro Goncalves'}
@@ -70,7 +72,6 @@ def ExibePontuacao():
     janela.blit(texto_recorde, ((largura_da_janela / 2.5), 0))
 def configuracoes():
     conf = True
-    music_intro.stop()
     while conf:
         cenario_config = pygame.image.load("imagens/cenario-config.png")
         janela.blit(cenario_config,(0,0))
@@ -83,13 +84,15 @@ def configuracoes():
             if event.type == pygame.KEYDOWN:
                 # Se pressionar 'v' volta para a intro do game
                 if event.key == pygame.K_v:
+                    pygame.mixer.music.play(-1)
                     conf = False
 def IntroDoGame():
-
+    pygame.mixer.music.load("musicas/musica-intro.mp3")
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.3)
     intro = True
     while intro:
-        #Play na música da intro
-        music_intro.play(-1)
+
         janela.blit(cenario_intro,(0,0))
         #parando música do game
         music.stop()
@@ -106,10 +109,12 @@ def IntroDoGame():
             if event.type ==pygame.KEYDOWN:
                 #Se pressionar enter sai do loop e entra no game
                 if event.key == pygame.K_RETURN:
-                    music_intro.stop()
+                    pygame.mixer.music.stop()
+                    time.sleep(0.4)
                     efeito_start.play(0)
                     intro = False
                 if event.key == pygame.K_c:
+                    pygame.mixer.music.stop()
                     configuracoes()
 
 
@@ -146,7 +151,9 @@ efeito = pygame.mixer.Sound("musicas/colisao.ogg")
 som_vitoria = pygame.mixer.Sound("musicas/venceu.ogg")
 efeito_q = pygame.mixer.Sound("musicas/perdeu.wav")
 efeito_start = pygame.mixer.Sound("musicas/start.mp3")
-music_intro = pygame.mixer.Sound("musicas/musica-intro.mp3")
+
+
+
 
 IntroDoGame()
 #Inicializando o loop da janela aberta
