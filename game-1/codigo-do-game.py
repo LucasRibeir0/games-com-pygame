@@ -11,7 +11,9 @@ personagem = pygame.image.load("imagens/avatar.png")
 cenario = pygame.image.load("imagens/cenario1.png")
 coracao = pygame.image.load("imagens/coracao.png")
 coracaoq = pygame.image.load("imagens/coracao-q.png")
+coracaov = pygame.image.load("imagens/coracao-v.png")
 cenario_intro = pygame.image.load("imagens/cenario-intro.png")
+
 #Pegando largura e altura dos objetos criados
 largura_da_janela = cenario.get_width()
 altura_da_janela = cenario.get_height()
@@ -21,25 +23,42 @@ largura_do_coracao = coracao.get_width()
 altura_do_coracao = coracao.get_height()
 largura_do_coracao_q = coracaoq.get_width()
 altura_do_coracao_q = coracaoq.get_height()
+largura_do_coracao_v = coracaov.get_width()
+altura_do_coracao_v = coracaov.get_height()
 
 #Criando outras variáveis
+FPS = 35
 velocidade = 8
 iteracao = 35
-iteracao1 = 50
+iteracao1 = 40
+iteracao2 = 500
+vidas = 5
 start = '-Pressione Enter para jogar'
 nome_jogo = 'Game Love'
 config = '-Pressione "C" para Configurações'
+pts = 'Pontuação: '
+vds = 'Vidas: '
+msg1_gameover = 'Continuar'
+msg2_gameover = 'Sair'
 pos_texto_dev = ((largura_da_janela/3.5),20)
-pos_texto_titulo = ((largura_da_janela/2.5),(altura_da_janela/2.5))
-pos_texto_start = ((largura_da_janela/3),(altura_da_janela/2))
+pos_texto_titulo = ((largura_da_janela/2.7),(altura_da_janela/2.4))
+pos_texto_start = ((largura_da_janela/3),(altura_da_janela/1.9))
+pos_pts = (10, 0)
+pos_vds = (10,25)
+pos1_gameover = ((largura_da_janela/3.5),(altura_da_janela/1.5))
+pos2_gameover = ((largura_da_janela/1.76),(altura_da_janela/1.5))
 pos_texto_config = ((290,altura_da_janela-70))
-contador = contador1 = vez = recorde = 0
+contador = contador1 = contador2 = vez = recorde = 0
 lista_coracao = []
 lista_coracao_q = []
+lista_coracao_v = []
 janela_aberta = True
 vermelho = (139,0,0)
+laranja = (255,69,0)
 rosa = (255,20,147)
 preto = (28,28,28)
+verde = (0,255,0)
+branco = (255,255,255)
 chocolate = (210,105,30)
 musica_na_tela = 50
 pedido = {'nome':'"O coracao','pedido':'tem razoes que a propria razao desconhece".'}
@@ -66,10 +85,8 @@ def CriaObjetos(lista_objeto,largura_objeto,altura_objeto,img_objeto, largura_ja
         vel_random = random.randint(3,8)
         #Colocando os objetos na lista
         lista_objeto.append({'objRect':pygame.Rect(posx,posy,largura_objeto,altura_objeto),'imagem':img_objeto,'velocidade':vel_random})
-def ExibePontuacao():
-    #Cria a msg de pontuação e exibe no centro da tela.
-    texto_recorde = font_recorde.render("Pontuação: " + str(recorde), True, rosa)
-    janela.blit(texto_recorde, ((largura_da_janela / 2.5), 0))
+        
+        
 def configuracoes():
     conf = True
     while conf:
@@ -96,10 +113,10 @@ def IntroDoGame():
         janela.blit(cenario_intro,(0,0))
         #parando música do game
         music.stop()
-        InformacoesIntro(nomedev,font_recorde,pos_texto_dev)
-        InformacoesIntro(nome_jogo,font_titulo,pos_texto_titulo)
-        InformacoesIntro(start,font_recorde,pos_texto_start)
-        InformacoesIntro(config,font_recorde,pos_texto_config)
+        informacoes(nomedev,False,font_recorde,pos_texto_dev,False,False)
+        informacoes(nome_jogo,False,font_titulo,pos_texto_titulo,False,False)
+        informacoes(start,False,font_recorde,pos_texto_start,False,False)
+        informacoes(config,False,font_recorde,pos_texto_config,False,False)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -117,18 +134,69 @@ def IntroDoGame():
                     pygame.mixer.music.stop()
                     configuracoes()
 
-
-
-
         pygame.display.update()
-def InformacoesIntro(mensagem,fonte,posicao_na_tela):
-    texto = fonte.render(mensagem,False,chocolate)
+        
+def informacoes(mensagem,cor_texto,fonte,posicao_na_tela,condicao,val_do_str):
+    texto = fonte.render(mensagem,True,chocolate)
     janela.blit(texto,(posicao_na_tela))
+    if condicao == True:
+         texto = fonte.render(mensagem  + str(val_do_str), True, cor_texto)
+         janela.blit(texto,(posicao_na_tela))
 
 
+def GameOver():
+    time.sleep(0.1)
+    efeito_gameover.play(0)
+    gameov = True
+    while gameov:
+        music.stop()
+        cenario_gameover = pygame.image.load("imagens/gameover.png")
+        janela.blit(cenario_gameover,(0,0))
+
+        #Posições dos retângulos em x e y;
+        px1 = pos1_gameover[0]-10
+        py1 = pos1_gameover[1]
+        px2 = pos2_gameover[0]-35
+        py2 = pos2_gameover[1]
+
+        #Criando os retângulos e o texto para exibir
+        rect_c = pygame.draw.rect(janela,preto,[px1,py1,200,70])
+        informacoes(msg1_gameover,False,font_titulo,pos1_gameover,False,False)
+        rect_s = pygame.draw.rect(janela,preto,[px2,py2,170,70])
+        informacoes(msg2_gameover,False,font_titulo,pos2_gameover,False,False)
+       
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+                pygame.quit()
+
+                #Se pressionar algum botão do mouse
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                #Posições do mouse
+                x = pygame.mouse.get_pos( )[0]
+                y = pygame.mouse.get_pos()[1]
+                
+                #Se o clique estiver dentro das dimensões dos retângulos
+                if x > px1 and y > py1 and x < px1+200 and y < py1+70:
+                    pygame.display.update()
+                    recorde = 0
+                    vidas = 5
+                    gameov = False
+
+                if x > px2 and y > py2 and x < px2+170 and y < py2+70:
+                    recorde = 0
+                    quit()
+                    pygame.quit()
+                    
+        #Carrega as informações na tela            
+        pygame.display.update()
+            
+        
 
 #inicializando pygame
 pygame.init()
+
 relogio = pygame.time.Clock()
 #Criando janela
 janela = pygame.display.set_mode((largura_da_janela,altura_da_janela))
@@ -142,7 +210,7 @@ font_geral = pygame.font.Font("fontes/Valentine.ttf",18)
 texto_pedido = font_geral.render(pedido['pedido'],True,vermelho)
 texto_nome = font_geral.render(pedido['nome'],True,vermelho)
 font_recorde = pygame.font.Font("fontes/Plant.ttf",36)
-font_titulo = pygame.font.Font("fontes/Plant.ttf",60)
+font_titulo = pygame.font.Font("fontes/Valentine.ttf",30)
 
 
 #Carregando som
@@ -151,6 +219,7 @@ efeito = pygame.mixer.Sound("musicas/colisao.ogg")
 som_vitoria = pygame.mixer.Sound("musicas/venceu.ogg")
 efeito_q = pygame.mixer.Sound("musicas/perdeu.wav")
 efeito_start = pygame.mixer.Sound("musicas/start.mp3")
+efeito_gameover = pygame.mixer.Sound("musicas/gameover.mp3")
 
 
 
@@ -158,8 +227,7 @@ efeito_start = pygame.mixer.Sound("musicas/start.mp3")
 IntroDoGame()
 #Inicializando o loop da janela aberta
 while janela_aberta:
-
-
+    
     #Condições para mudar de cenário
     if recorde >= 100 and recorde < 200:
         cenario = pygame.image.load("imagens/cenario2.png")
@@ -172,7 +240,7 @@ while janela_aberta:
     elif recorde >=300 and recorde < 400:
         cenario = pygame.image.load("imagens/cenario4.png")
         iteracao = 20
-        iteracao1 = 55
+        iteracao1 = 30
 
     elif recorde >=400 and recorde < 500:
         cenario = pygame.image.load("imagens/cenario5.png")
@@ -181,16 +249,17 @@ while janela_aberta:
     elif recorde >= 500 and recorde < 600:
         cenario = pygame.image.load("imagens/cenario6.png")
         iteracao = 25
-        iteracao1 = 62
+        iteracao1 = 35
         velocidade = 80
     elif recorde >=600 and recorde < 700:
         cenario = pygame.image.load("imagens/cenario7.png")
         iteracao = 32
-        iteracao1 = 75
+        iteracao1 = 42
         velocidade = 180
     elif recorde >=700 and recorde < 800:
         cenario = pygame.image.load("imagens/cenario8.png")
         iteracao = 11
+        iteracao1 = 22
         velocidade = 90
 
     elif recorde >=800 and recorde < 900:
@@ -203,11 +272,16 @@ while janela_aberta:
 
         velocidade = 90
     elif recorde >= 1000:
+        pygame.mixer.music.stop()
         cenario = pygame.image.load("imagens/cenario-venceu.png")
+        
         if vez == 0:
             som_vitoria.play(-1)
+            
 
     janela.blit(cenario,(0,0))
+    pygame.draw.rect(janela,preto,[0,0,170,60])
+    
     #For para pegar eventos
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
@@ -253,24 +327,42 @@ while janela_aberta:
     if contador1 > iteracao1:
         contador1 = 0
         CriaObjetos(lista_coracao_q,largura_do_coracao_q,altura_do_coracao_q,coracaoq,largura_da_janela)
-
-
+        
+    #Condição para criar o coração verde que derá vidas ao personagem  
+    contador2+=1
+    if contador2 > iteracao2:
+        contador2 = 0
+        CriaObjetos(lista_coracao_v,largura_do_coracao_v,altura_do_coracao_v,coracaov,largura_da_janela)
 
     #Chamando a função com o personagem principal
     MoverJogador(jogador,teclas,(largura_da_janela,altura_da_janela))
     #Desenhando o personagem
     janela.blit(jogador['imagem'],jogador['objRect'])
-
+    
 
     #coração quebrado
+    informacoes(vds,rosa,font_recorde,pos_vds,True,vidas)
+    
     for coraq in lista_coracao_q[:]:
         choqueq = jogador['objRect'].colliderect(coraq['objRect'])
         if choqueq:
             efeito_q.play(0)
+            if vidas == 1:
+                GameOver()
+                #Depois que voltar do GameOver volta com as vidas e
+                #as teclas recebem False pra não movimentar o personagem
+                
+                teclas = {'direita':False,'esquerda':False}
+                vidas = 6
+                
+            #Enquando as vidas forem >1 pode ir descontando    
+            if vidas > 1:
+                vidas-=1
+            
             if recorde >=5:
                 #Diminui 5 pontos caso haja colisão com o coração quebrado
                 recorde-=5
-                ExibePontuacao()
+                informacoes(pts,rosa,font_recorde,pos_pts,True,recorde)
             #Depois do choque remove o coração da lista, pra não pesar o jogo
             lista_coracao_q.remove(coraq)
 
@@ -281,7 +373,29 @@ while janela_aberta:
         MoverCoracao(coraq)
         janela.blit(coraq['imagem'],coraq['objRect'])
 
+    #Coracao vidas
+    for corav in lista_coracao_v[:]:
+        informacoes(vds,rosa,font_recorde,pos_vds,True,vidas)
+        choquev = jogador['objRect'].colliderect(corav['objRect'])
+        
+        if choquev:
+            efeito.play(0)
+            
+            if vidas >0 and vidas <5:
+                vidas+=1
+                informacoes(vds,rosa,font_recorde,pos_vds,True,vidas)
+                
+            #Depois do choque remove o coração da lista, pra não pesar o jogo
+            lista_coracao_v.remove(corav)
 
+        if corav['objRect'].y > altura_da_janela and corav in lista_coracao_v:
+            lista_coracao_v.remove(corav)
+
+    for corav in lista_coracao_v:
+        MoverCoracao(corav)
+        janela.blit(corav['imagem'],corav['objRect'])
+        
+        
     #For para a colisão e a remoção do coração caso ocorra a colisão
     for coracaozinho in lista_coracao[:]:
         choque = jogador['objRect'].colliderect(coracaozinho['objRect'])
@@ -290,7 +404,7 @@ while janela_aberta:
             efeito.play(0)
             recorde +=1
             lista_coracao.remove(coracaozinho)
-        ExibePontuacao()
+        informacoes(pts,rosa,font_recorde,pos_pts,True,recorde)
 
         if coracaozinho['objRect'].y > altura_da_janela and coracaozinho in lista_coracao:
             lista_coracao.remove(coracaozinho)
@@ -305,8 +419,9 @@ while janela_aberta:
         janela.blit(coracaozinho['imagem'],coracaozinho['objRect'])
 
     pygame.display.update()
-    relogio.tick(35)
+    relogio.tick(FPS)
 
+    
 
 #Finalizando o módulo pygame
 pygame.quit()
